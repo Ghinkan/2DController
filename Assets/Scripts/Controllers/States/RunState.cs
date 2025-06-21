@@ -5,15 +5,22 @@ namespace Controller2DProject.Controllers.States
 {
     public class RunState : IState
     {
+        private readonly PlayerControllerStates _playerController;
         private readonly InputReader _input;
         private readonly PlayerData _playerData;
         private readonly Rigidbody2D _rb;
 
-        public RunState(InputReader input, PlayerData playerData, Rigidbody2D rb)
+        public RunState(PlayerControllerStates playerController, InputReader input, PlayerData playerData, Rigidbody2D rb)
         {
+            _playerController = playerController;
             _input = input;
             _playerData = playerData;
             _rb = rb;
+        }
+        
+        public void OnEnter()
+        {
+            _playerController.SetGravityScale(_playerData.GravityScale);
         }
 
         public void FixedUpdate()

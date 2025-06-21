@@ -5,15 +5,41 @@ namespace Controller2DProject.Controllers.States
 {
     public class FallState : IState
     {
+        private readonly PlayerControllerStates _playerController;
         private readonly InputReader _input;
         private readonly PlayerData _playerData;
         private readonly Rigidbody2D _rb;
 
-        public FallState(InputReader input, PlayerData playerData, Rigidbody2D rb)
+        public FallState(PlayerControllerStates playerController, InputReader input, PlayerData playerData, Rigidbody2D rb)
         {
+            _playerController = playerController;
             _input = input;
             _playerData = playerData;
             _rb = rb;
+        }
+
+        public void Update()
+        {
+            if (_rb.linearVelocity.y < 0 && _input.Direction.y < 0)
+            {
+                //Much higher gravity if holding down
+                _playerController.SetGravityScale(_playerData.GravityScale * _playerData.FastFallGravityMult);
+                //Caps maximum fall speed, so when falling over large distances we don't accelerate to insanely high speeds
+                _rb.linearVelocity = new Vector2(_rb.linearVelocity.x, Mathf.Max(_rb.linearVelocity.y, -_playerData.MaxFastFallSpeed));
+            }
+            else if (_playerController.IsJumpCut)
+            {
+                //Higher gravity if jump button released
+                _playerController.SetGravityScale(_playerData.GravityScale * _playerData.JumpCutGravityMult);
+                _rb.linearVelocity = new Vector2(_rb.linearVelocity.x, Mathf.Max(_rb.linearVelocity.y, -_playerData.MaxFallSpeed));
+            }
+            else
+            {
+                //Higher gravity if falling
+                _playerController.SetGravityScale(_playerData.GravityScale * _playerData.FallGravityMult);
+                //Caps maximum fall speed, so when falling over large distances we don't accelerate to insanely high speeds
+                _rb.linearVelocity = new Vector2(_rb.linearVelocity.x, Mathf.Max(_rb.linearVelocity.y, -_playerData.MaxFallSpeed));
+            }
         }
 
         public void FixedUpdate()

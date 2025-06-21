@@ -5,12 +5,14 @@ namespace Controller2DProject.Controllers.States
 {
     public class JumpState : IState
     {
+        private readonly PlayerControllerStates _playerController;
         private readonly InputReader _input;
         private readonly PlayerData _playerData;
         private readonly Rigidbody2D _rb;
         
-        public JumpState(InputReader input, PlayerData playerData, Rigidbody2D rb)
+        public JumpState(PlayerControllerStates playerController, InputReader input, PlayerData playerData, Rigidbody2D rb)
         {
+            _playerController = playerController;
             _input = input;
             _playerData = playerData;
             _rb = rb;
@@ -18,7 +20,27 @@ namespace Controller2DProject.Controllers.States
 
         public void OnEnter()
         {
+            _playerController.LastPressedJumpTime.Stop();
+            _playerController.LastOnGroundTimer.Stop();
+            _playerController.IsJumpCut = false;
+            
+            _playerController.SetGravityScale(_playerData.GravityScale * _playerData.JumpHangGravityMult);
             Jump();
+        }
+
+        public void Update()
+        {
+            if (_playerController.IsJumpCut)
+            {
+                //Higher gravity if jump button released
+                _playerController.SetGravityScale(_playerData.GravityScale * _playerData.JumpCutGravityMult);
+            }
+            else if (Mathf.Abs(_rb.linearVelocity.y) < _playerData.JumpHangTimeThreshold)
+            {
+                _playerController.SetGravityScale(_playerData.GravityScale * _playerData.JumpHangGravityMult);
+            }
+            else
+                _playerController.SetGravityScale(_playerData.GravityScale);
         }
 
         public void FixedUpdate()
@@ -28,15 +50,6 @@ namespace Controller2DProject.Controllers.States
 
         private void Jump()
         {
-            // IsJumping = true;
-            // IsWallJumping = false;
-            // _isJumpCut = false;
-            // _isJumpFalling = false;
-            
-            //Ensures we can't call Jump multiple times from one press
-            // _lastPressedJumpTime.Stop();
-            // _lastOnGroundTimer.Stop();
-            
             //We increase the force applied if we are falling
             //This means we'll always feel like we jump the same amount 
             //(setting the player's Y velocity to 0 beforehand will likely work the same, but I find this more elegant :D)
