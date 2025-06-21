@@ -3,14 +3,14 @@ using UnityEngine;
 using UnityUtils.StateMachine;
 namespace Controller2DProject.Controllers.States
 {
-    public class FallState : IState
+    public class WallJumpState : IState
     {
         private readonly PlayerControllerStates _playerController;
         private readonly InputReader _input;
         private readonly PlayerData _playerData;
         private readonly Rigidbody2D _rb;
-
-        public FallState(PlayerControllerStates playerController, InputReader input, PlayerData playerData, Rigidbody2D rb)
+        
+        public WallJumpState(PlayerControllerStates playerController, InputReader input, PlayerData playerData, Rigidbody2D rb)
         {
             _playerController = playerController;
             _input = input;
@@ -18,32 +18,64 @@ namespace Controller2DProject.Controllers.States
             _rb = rb;
         }
         
+        public void OnEnter()
+        {
+            int dir = (_playerController.LastOnWallRightTime.IsRunning) ? -1 : 1;
+            
+            _playerController.LastPressedJumpTime.Stop();
+            _playerController.LastOnGroundTimer.Stop();
+            _playerController.LastOnWallRightTime.Stop();
+            _playerController.LastOnWallLeftTime.Stop();
+            
+            _playerController.SetGravityScale(_playerData.GravityScale * _playerData.JumpHangGravityMult);
+            WallJump(dir);
+        }
+        
+        public void Update()
+        {
+            if(!_input.IsJumpKeyPressed())
+                _playerController.IsJumpCut = true;
+        }
+
         public void FixedUpdate()
         {
-            if (_rb.linearVelocity.y < 0 && _input.Direction.y < 0)
-            {
-                //Much higher gravity if holding down
-                _playerController.SetGravityScale(_playerData.GravityScale * _playerData.FastFallGravityMult);
-                //Caps maximum fall speed, so when falling over large distances we don't accelerate to insanely high speeds
-                _rb.linearVelocity = new Vector2(_rb.linearVelocity.x, Mathf.Max(_rb.linearVelocity.y, -_playerData.MaxFastFallSpeed));
-            }
-            else if (_playerController.IsJumpCut)
+            if (_playerController.IsJumpCut)
             {
                 //Higher gravity if jump button released
                 _playerController.SetGravityScale(_playerData.GravityScale * _playerData.JumpCutGravityMult);
-                _rb.linearVelocity = new Vector2(_rb.linearVelocity.x, Mathf.Max(_rb.linearVelocity.y, -_playerData.MaxFallSpeed));
+            }
+            else if (Mathf.Abs(_rb.linearVelocity.y) < _playerData.JumpHangTimeThreshold)
+            {
+                _playerController.SetGravityScale(_playerData.GravityScale * _playerData.JumpHangGravityMult);
             }
             else
-            {
-                //Higher gravity if falling
-                _playerController.SetGravityScale(_playerData.GravityScale * _playerData.FallGravityMult);
-                //Caps maximum fall speed, so when falling over large distances we don't accelerate to insanely high speeds
-                _rb.linearVelocity = new Vector2(_rb.linearVelocity.x, Mathf.Max(_rb.linearVelocity.y, -_playerData.MaxFallSpeed));
-            }
+                _playerController.SetGravityScale(_playerData.GravityScale);
             
-            Move(1);
+            Move(_playerData.WallJumpRunLerp);
+        }
+        
+        public void OnExit()
+        {
+            _playerController.IsJumpCut = false;
         }
 
+        private void WallJump(int dir)
+        {
+            Vector2 force = new Vector2(_playerData.WallJumpForce.x, _playerData.WallJumpForce.y);
+            force.x *= dir; //apply force in opposite direction of wall
+
+            if (Mathf.Sign(_rb.linearVelocity.x) != Mathf.Sign(force.x))
+                force.x -= _rb.linearVelocity.x;
+            
+            //Checks whether player is falling, if so we subtract the velocity.y (counteracting force of gravity). This ensures the player always reaches our desired jump force or greater
+            if (_rb.linearVelocity.y < 0)
+                force.y -= _rb.linearVelocity.y;
+
+            //Unlike in the run we want to use the Impulse mode.
+            //The default mode will apply are force instantly ignoring masss
+            _rb.AddForce(force, ForceMode2D.Impulse);
+        }
+        
         private void Move(float lerpAmount)
         {
             //Calculate the direction we want to move in and our desired velocity
@@ -71,7 +103,7 @@ namespace Controller2DProject.Controllers.States
             }
             
             //Calculate difference between current velocity and desired velocity
-            //Calculate force along x-axis to apply to thr player
+            //Calculate force along x-axis to apply to the player
             float speedDif = targetSpeed - _rb.linearVelocity.x;
             float movement = speedDif * accelRate;
 

@@ -22,26 +22,21 @@ namespace Controller2DProject.Controllers
         private Rigidbody2D _rb;
         private Transform _tr;
 
-        //Variables control the various actions the player can perform at any time.
-        //These are fields which can are public allowing for other sctipts to read them
-        //but can only be privately written to.
         public bool IsFacingRight { get; private set; }
         public bool IsJumping { get; private set; }
         public bool IsWallJumping { get; private set; }
         public bool IsDashing { get; private set; }
-        public bool IsSliding { get; private set; }
 
         //Timers
         public CountdownTimer LastOnGroundTimer;
-        private CountdownTimer _lastOnWallTimer;
-        private CountdownTimer _lastOnWallRightTime;
-        private CountdownTimer _lastOnWallLeftTime;
+        public CountdownTimer LastOnWallTimer;
+        public CountdownTimer LastOnWallRightTime;
+        public CountdownTimer LastOnWallLeftTime;
         public CountdownTimer LastPressedJumpTime;
         private CountdownTimer _lastPressedDashTime;
 
         //Jump
         public bool IsJumpCut;
-        private bool _isJumpFalling;
 
         //Wall Jump
         private float _wallJumpStartTime;
@@ -58,6 +53,8 @@ namespace Controller2DProject.Controllers
         private RunState _runState;
         private JumpState _jumpState;
         private FallState _fallState;
+        private WallSlide _wallSlide;
+        private WallJumpState _wallJumpState;
 
         private void Awake()
         {
@@ -65,9 +62,9 @@ namespace Controller2DProject.Controllers
             _rb = GetComponent<Rigidbody2D>();
 
             LastOnGroundTimer = new CountdownTimer(0f, this);
-            _lastOnWallTimer = new CountdownTimer(0f, this);
-            _lastOnWallRightTime  = new CountdownTimer(0f, this);
-            _lastOnWallLeftTime   = new CountdownTimer(0f, this);
+            LastOnWallTimer = new CountdownTimer(0f, this);
+            LastOnWallRightTime  = new CountdownTimer(0f, this);
+            LastOnWallLeftTime   = new CountdownTimer(0f, this);
             LastPressedJumpTime = new CountdownTimer(0f, this);
             _lastPressedDashTime = new CountdownTimer(0f, this);
             
@@ -82,21 +79,35 @@ namespace Controller2DProject.Controllers
             _runState = new RunState(this, _input, _playerData, _rb);
             _jumpState = new JumpState(this, _input, _playerData, _rb);
             _fallState = new FallState(this,_input, _playerData, _rb);
+            _wallSlide = new WallSlide(this, _input, _playerData, _rb);
+            _wallJumpState = new WallJumpState(this, _input, _playerData, _rb);
 
             At(_idleState, _runState, () => _input.Direction.x != 0);
             At(_idleState, _jumpState,    () => CanJump() && LastPressedJumpTime.IsRunning);
             At(_idleState, _fallState,    () => LastOnGroundTimer.IsFinished);
             
-            At(_runState, _idleState,     () => Mathf.Abs(_rb.linearVelocityX) <= 0);
+            At(_runState, _idleState,     () => Mathf.Abs(_rb.linearVelocityX) <= 0 && _input.Direction.x == 0);
             At(_runState, _jumpState,     () => CanJump() && LastPressedJumpTime.IsRunning);
             At(_runState, _fallState,     () => LastOnGroundTimer.IsFinished);
             
             At(_jumpState, _fallState,    () => _rb.linearVelocityY < 0);
             At(_jumpState, _idleState,    () => IsGrounded() && Mathf.Abs(_rb.linearVelocityX) <= 0);
             At(_jumpState, _runState,     () => IsGrounded() && _input.Direction.x != 0);
+            At(_wallSlide, _wallJumpState, () => CanWallJump() && LastPressedJumpTime.IsRunning);
             
             At(_fallState, _idleState,    () => IsGrounded() && Mathf.Abs(_rb.linearVelocityX) <= 0);
             At(_fallState, _runState,     () => IsGrounded() && _input.Direction.x != 0);
+            At(_fallState, _wallSlide, () => CanSlide() && ((LastOnWallLeftTime.IsRunning && _input.Direction.x < 0) || (LastOnWallRightTime.IsRunning && _input.Direction.x > 0)));
+            At(_fallState, _wallJumpState, () => CanWallJump() && LastPressedJumpTime.IsRunning);
+            
+            At(_wallSlide, _idleState, () => IsGrounded() && Mathf.Abs(_rb.linearVelocityX) <= 0);
+            At(_wallSlide, _runState, () => IsGrounded() && _input.Direction.x != 0);
+            At(_wallSlide, _fallState, () => !(CanSlide() && ((LastOnWallLeftTime.IsRunning && _input.Direction.x < 0) || (LastOnWallRightTime.IsRunning && _input.Direction.x > 0))));
+            At(_wallSlide, _wallJumpState, () => CanWallJump() && LastPressedJumpTime.IsRunning);
+            
+            At(_wallJumpState, _fallState,    () => _rb.linearVelocityY < 0);
+            At(_wallJumpState, _idleState,    () => IsGrounded() && Mathf.Abs(_rb.linearVelocityX) <= 0);
+            At(_wallJumpState, _runState,     () => IsGrounded() && _input.Direction.x != 0);
             
             _stateMachine.SetState(_idleState);
         }
@@ -146,11 +157,6 @@ namespace Controller2DProject.Controllers
         {
             if (jumpInputStarted)
                 LastPressedJumpTime.Restart(_playerData.JumpInputBufferTime);
-            else
-            {
-                if (_stateMachine.CurrentState is JumpState && _rb.linearVelocity.y >= 0)
-                    IsJumpCut = true;
-            }
         }
 
         private void OnDashInput()
@@ -180,43 +186,37 @@ namespace Controller2DProject.Controllers
 
         private void FixedUpdate()
         {
-            _groundSensor.Cast();
-            
-            if (_groundSensor.HasDetectedHit())
+            //CollisionsChecks
+            if (!IsDashing && !IsJumping)
             {
-                LastOnGroundTimer.Restart(_playerData.CoyoteTime);
+                _groundSensor.Cast();
+                _frontWallSensor.Cast();
+                _backWallSensor.Cast();
+            
+                if (!IsDashing && !IsJumping)
+                {
+                    if (_groundSensor.HasDetectedHit())
+                    {
+                        LastOnGroundTimer.Restart(_playerData.CoyoteTime);
+                    }
+            
+                    //Two checks needed for both left and right walls since whenever the play turns the wall checkPoints swap sides
+                    if (((_frontWallSensor.HasDetectedHit() && IsFacingRight) || (_backWallSensor.HasDetectedHit() && !IsFacingRight)) && !IsWallJumping)
+                    {
+                        LastOnWallRightTime.Restart(_playerData.CoyoteTime);
+                    }
+            
+                    if (((_frontWallSensor.HasDetectedHit() && !IsFacingRight) || (_backWallSensor.HasDetectedHit() && IsFacingRight)) && !IsWallJumping)
+                    {
+                        LastOnWallLeftTime.Restart(_playerData.CoyoteTime);
+                    }
+                    
+                    float maxWallTime = Mathf.Max(LastOnWallLeftTime.CurrentTime, LastOnWallRightTime.CurrentTime);
+                    if(maxWallTime > 0)
+                        LastOnWallTimer.Restart(maxWallTime);
+                }
             }
             
-            // //CollisionsChecks (fixedUpdate?)
-            // if (!IsDashing && !IsJumping)
-            // {
-            //     _groundSensor.Cast();
-            //     _frontWallSensor.Cast();
-            //     _backWallSensor.Cast();
-            //
-            //     if (!IsDashing && !IsJumping)
-            //     {
-            //         if (_groundSensor.HasDetectedHit())
-            //         {
-            //             LastOnGroundTimer.Restart(_playerData.CoyoteTime);
-            //         }
-            //
-            //         //Two checks needed for both left and right walls since whenever the play turns the wall checkPoints swap sides
-            //         if (((_frontWallSensor.HasDetectedHit() && IsFacingRight) || (_backWallSensor.HasDetectedHit() && !IsFacingRight)) && !IsWallJumping)
-            //         {
-            //             _lastOnWallRightTime.Restart(_playerData.CoyoteTime);
-            //         }
-            //
-            //         if (((_frontWallSensor.HasDetectedHit() && !IsFacingRight) || (_backWallSensor.HasDetectedHit() && IsFacingRight)) && !IsWallJumping)
-            //         {
-            //             _lastOnWallLeftTime.Restart(_playerData.CoyoteTime);
-            //         }
-            //         
-            //         float maxWallTime = Mathf.Max(_lastOnWallLeftTime.CurrentTime, _lastOnWallRightTime.CurrentTime);
-            //         if(maxWallTime > 0)
-            //             _lastOnWallTimer.Restart(maxWallTime);
-            //     }
-            // }
             _stateMachine.FixedUpdate();
         }
 
@@ -238,28 +238,6 @@ namespace Controller2DProject.Controllers
             Time.timeScale = 0;
             yield return new WaitForSecondsRealtime(duration); //Must be Realtime since timeScale with be 0 
             Time.timeScale = 1;
-        }
-        
-        private void WallJump(int dir)
-        {
-            //Ensures we can't call Wall Jump multiple times from one press
-            LastPressedJumpTime.Stop();
-            LastOnGroundTimer.Stop();
-            _lastOnWallRightTime.Stop();
-            _lastOnWallLeftTime.Stop();
-            
-            Vector2 force = new Vector2(_playerData.WallJumpForce.x, _playerData.WallJumpForce.y);
-            force.x *= dir; //apply force in opposite direction of wall
-
-            if (Mathf.Sign(_rb.linearVelocity.x) != Mathf.Sign(force.x))
-                force.x -= _rb.linearVelocity.x;
-
-            if (_rb.linearVelocity.y < 0) //checks whether player is falling, if so we subtract the velocity.y (counteracting force of gravity). This ensures the player always reaches our desired jump force or greater
-                force.y -= _rb.linearVelocity.y;
-
-            //Unlike in the run we want to use the Impulse mode.
-            //The default mode will apply are force instantly ignoring masss
-            _rb.AddForce(force, ForceMode2D.Impulse);
         }
         
         private IEnumerator StartDash(Vector2 dir)
@@ -313,19 +291,6 @@ namespace Controller2DProject.Controllers
             _dashesLeft = Mathf.Min(_playerData.DashAmount, _dashesLeft + 1);
         }
         
-        private void Slide()
-        {
-            //Works the same as the Run but only in the y-axis
-            //THis seems to work fine, buit maybe you'll find a better way to implement a slide into this system
-            float speedDif = _playerData.SlideSpeed - _rb.linearVelocity.y;	
-            float movement = speedDif * _playerData.SlideAccel;
-            //So, we clamp the movement here to prevent any over corrections (these aren't noticeable in the Run)
-            //The force applied can't be greater than the (negative) speedDifference * by how many times a second FixedUpdate() is called. For more info research how force are applied to rigidbodies.
-            movement = Mathf.Clamp(movement, -Mathf.Abs(speedDif)  * (1 / Time.fixedDeltaTime), Mathf.Abs(speedDif) * (1 / Time.fixedDeltaTime));
-
-            _rb.AddForce(movement * Vector2.up);
-        }
-        
         private bool CanJump()
         {
             return LastOnGroundTimer.IsRunning && !IsJumping;
@@ -333,18 +298,8 @@ namespace Controller2DProject.Controllers
 
         private bool CanWallJump()
         {
-            return LastPressedJumpTime.IsRunning && _lastOnWallTimer.IsRunning && LastOnGroundTimer.IsFinished && (!IsWallJumping ||
-                (_lastOnWallRightTime.IsRunning && _lastWallJumpDir == 1) || (_lastOnWallLeftTime.IsRunning && _lastWallJumpDir == -1));
-        }
-
-        private bool CanJumpCut()
-        {
-            return IsJumping && _rb.linearVelocity.y > 0;
-        }
-
-        private bool CanWallJumpCut()
-        {
-            return IsWallJumping && _rb.linearVelocity.y > 0;
+            return LastPressedJumpTime.IsRunning && LastOnWallTimer.IsRunning && LastOnGroundTimer.IsFinished && (!IsWallJumping ||
+                (LastOnWallRightTime.IsRunning && _lastWallJumpDir == 1) || (LastOnWallLeftTime.IsRunning && _lastWallJumpDir == -1));
         }
 
         private bool CanDash()
@@ -359,10 +314,7 @@ namespace Controller2DProject.Controllers
 
         private bool CanSlide()
         {
-            if (_lastOnWallTimer.IsRunning && !IsJumping && !IsWallJumping && !IsDashing && LastOnGroundTimer.IsFinished)
-                return true;
-            else
-                return false;
+            return LastOnWallTimer.IsRunning && !IsJumping && !IsWallJumping && !IsDashing && LastOnGroundTimer.IsFinished;
         }
 
         private void OnDrawGizmos()

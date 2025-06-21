@@ -9,6 +9,7 @@ namespace Controller2DProject.Controllers.States
         private readonly InputReader _input;
         private readonly PlayerData _playerData;
         private readonly Rigidbody2D _rb;
+        
         public IdleState(PlayerControllerStates playerController, InputReader input, PlayerData playerData, Rigidbody2D rb)
         {
             _playerController = playerController;
@@ -22,4 +23,5 @@ namespace Controller2DProject.Controllers.States
             _playerController.SetGravityScale(_playerData.GravityScale);
         }
     }
+
 }

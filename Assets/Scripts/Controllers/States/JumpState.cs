@@ -22,13 +22,18 @@ namespace Controller2DProject.Controllers.States
         {
             _playerController.LastPressedJumpTime.Stop();
             _playerController.LastOnGroundTimer.Stop();
-            _playerController.IsJumpCut = false;
             
             _playerController.SetGravityScale(_playerData.GravityScale * _playerData.JumpHangGravityMult);
             Jump();
         }
 
         public void Update()
+        {
+            if(!_input.IsJumpKeyPressed())
+                _playerController.IsJumpCut = true;
+        }
+
+        public void FixedUpdate()
         {
             if (_playerController.IsJumpCut)
             {
@@ -41,13 +46,15 @@ namespace Controller2DProject.Controllers.States
             }
             else
                 _playerController.SetGravityScale(_playerData.GravityScale);
-        }
-
-        public void FixedUpdate()
-        {
+            
             Move(1);
         }
-
+        
+        public void OnExit()
+        {
+            _playerController.IsJumpCut = false;
+        }
+        
         private void Jump()
         {
             //We increase the force applied if we are falling
