@@ -9,6 +9,8 @@ namespace Controller2DProject.Controllers.States
         private readonly InputReader _input;
         private readonly PlayerData _playerData;
         private readonly Rigidbody2D _rb;
+
+        private bool _isJumpCut;
         
         public JumpState(PlayerControllerStates playerController, InputReader input, PlayerData playerData, Rigidbody2D rb)
         {
@@ -23,38 +25,36 @@ namespace Controller2DProject.Controllers.States
             _playerController.LastPressedJumpTime.Stop();
             _playerController.LastOnGroundTimer.Stop();
             
-            _playerController.SetGravityScale(_playerData.GravityScale * _playerData.JumpHangGravityMult);
             Jump();
+
+            _isJumpCut = false;
+            if (!_input.IsJumpKeyPressed())
+            {
+                _isJumpCut = true;
+                _playerController.SetGravityScale(_playerData.GravityScale * _playerData.JumpCutGravityMult);
+            }
+            else
+                _playerController.SetGravityScale(_playerData.GravityScale * _playerData.JumpHangGravityMult);
         }
 
         public void Update()
         {
             if(!_input.IsJumpKeyPressed())
-                _playerController.IsJumpCut = true;
+                _isJumpCut = true;
+            
+            if (_isJumpCut)
+                _playerController.SetGravityScale(_playerData.GravityScale * _playerData.JumpCutGravityMult);
+            else if (Mathf.Abs(_rb.linearVelocity.y) < _playerData.JumpHangTimeThreshold)
+                _playerController.SetGravityScale(_playerData.GravityScale * _playerData.JumpHangGravityMult);
+            else
+                _playerController.SetGravityScale(_playerData.GravityScale);
         }
 
         public void FixedUpdate()
         {
-            if (_playerController.IsJumpCut)
-            {
-                //Higher gravity if jump button released
-                _playerController.SetGravityScale(_playerData.GravityScale * _playerData.JumpCutGravityMult);
-            }
-            else if (Mathf.Abs(_rb.linearVelocity.y) < _playerData.JumpHangTimeThreshold)
-            {
-                _playerController.SetGravityScale(_playerData.GravityScale * _playerData.JumpHangGravityMult);
-            }
-            else
-                _playerController.SetGravityScale(_playerData.GravityScale);
-            
             Move(1);
         }
-        
-        public void OnExit()
-        {
-            _playerController.IsJumpCut = false;
-        }
-        
+
         private void Jump()
         {
             //We increase the force applied if we are falling

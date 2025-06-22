@@ -38,7 +38,6 @@ namespace Controller2DProject.Controllers
         private DashState _dashState;
         
         public bool IsFacingRight { get; private set; }
-        public bool IsJumpCut;
         
         private void Awake()
         {

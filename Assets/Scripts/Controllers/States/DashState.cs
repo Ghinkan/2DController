@@ -50,9 +50,11 @@ namespace Controller2DProject.Controllers.States
             _dashRefill.ConsumeDash();
         }
         
-        public void Update()
+        public void FixedUpdate()
         {
             if(!IsDashing) return;
+            
+            _dashTimer -= Time.deltaTime;
             
             if (_isDashAttacking)
             {
@@ -73,8 +75,6 @@ namespace Controller2DProject.Controllers.States
                 if (_dashTimer <= 0f)
                     IsDashing = false;
             }
-            
-            _dashTimer -= Time.deltaTime;
         }
         
         private void Move(float lerpAmount)

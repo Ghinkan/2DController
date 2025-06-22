@@ -10,6 +10,8 @@ namespace Controller2DProject.Controllers.States
         private readonly PlayerData _playerData;
         private readonly Rigidbody2D _rb;
         
+        private bool _isJumpCut;
+        
         public WallJumpState(PlayerControllerStates playerController, InputReader input, PlayerData playerData, Rigidbody2D rb)
         {
             _playerController = playerController;
@@ -29,36 +31,35 @@ namespace Controller2DProject.Controllers.States
             
             _playerController.SetGravityScale(_playerData.GravityScale * _playerData.JumpHangGravityMult);
             WallJump(dir);
+            
+            _isJumpCut = false;
+            if (!_input.IsJumpKeyPressed())
+            {
+                _isJumpCut = true;
+                _playerController.SetGravityScale(_playerData.GravityScale * _playerData.JumpCutGravityMult);
+            }
+            else
+                _playerController.SetGravityScale(_playerData.GravityScale * _playerData.JumpHangGravityMult);
         }
         
         public void Update()
         {
             if(!_input.IsJumpKeyPressed())
-                _playerController.IsJumpCut = true;
+                _isJumpCut = true;
+            
+            if (_isJumpCut)
+                _playerController.SetGravityScale(_playerData.GravityScale * _playerData.JumpCutGravityMult);
+            else if (Mathf.Abs(_rb.linearVelocity.y) < _playerData.JumpHangTimeThreshold)
+                _playerController.SetGravityScale(_playerData.GravityScale * _playerData.JumpHangGravityMult);
+            else
+                _playerController.SetGravityScale(_playerData.GravityScale);
         }
 
         public void FixedUpdate()
         {
-            if (_playerController.IsJumpCut)
-            {
-                //Higher gravity if jump button released
-                _playerController.SetGravityScale(_playerData.GravityScale * _playerData.JumpCutGravityMult);
-            }
-            else if (Mathf.Abs(_rb.linearVelocity.y) < _playerData.JumpHangTimeThreshold)
-            {
-                _playerController.SetGravityScale(_playerData.GravityScale * _playerData.JumpHangGravityMult);
-            }
-            else
-                _playerController.SetGravityScale(_playerData.GravityScale);
-            
             Move(_playerData.WallJumpRunLerp);
         }
         
-        public void OnExit()
-        {
-            _playerController.IsJumpCut = false;
-        }
-
         private void WallJump(int dir)
         {
             Vector2 force = new Vector2(_playerData.WallJumpForce.x, _playerData.WallJumpForce.y);

@@ -10,6 +10,8 @@ namespace Controller2DProject.Controllers.States
         private readonly PlayerData _playerData;
         private readonly Rigidbody2D _rb;
 
+        private bool _isJumpCut;
+        
         public FallState(PlayerControllerStates playerController, InputReader input, PlayerData playerData, Rigidbody2D rb)
         {
             _playerController = playerController;
@@ -18,7 +20,22 @@ namespace Controller2DProject.Controllers.States
             _rb = rb;
         }
         
-        public void FixedUpdate()
+        public void OnEnter()
+        {
+            _playerController.LastPressedJumpTime.Stop();
+            _playerController.LastOnGroundTimer.Stop();
+            
+            _isJumpCut = false;
+            if (!_input.IsJumpKeyPressed())
+            {
+                _isJumpCut = true;
+                _playerController.SetGravityScale(_playerData.GravityScale * _playerData.JumpCutGravityMult);
+            }
+            else
+                _playerController.SetGravityScale(_playerData.GravityScale * _playerData.FallGravityMult);
+        }
+        
+        public void Update()
         {
             if (_rb.linearVelocity.y < 0 && _input.Direction.y < 0)
             {
@@ -27,7 +44,7 @@ namespace Controller2DProject.Controllers.States
                 //Caps maximum fall speed, so when falling over large distances we don't accelerate to insanely high speeds
                 _rb.linearVelocity = new Vector2(_rb.linearVelocity.x, Mathf.Max(_rb.linearVelocity.y, -_playerData.MaxFastFallSpeed));
             }
-            else if (_playerController.IsJumpCut)
+            else if (_isJumpCut)
             {
                 //Higher gravity if jump button released
                 _playerController.SetGravityScale(_playerData.GravityScale * _playerData.JumpCutGravityMult);
@@ -40,7 +57,10 @@ namespace Controller2DProject.Controllers.States
                 //Caps maximum fall speed, so when falling over large distances we don't accelerate to insanely high speeds
                 _rb.linearVelocity = new Vector2(_rb.linearVelocity.x, Mathf.Max(_rb.linearVelocity.y, -_playerData.MaxFallSpeed));
             }
-            
+        }
+
+        public void FixedUpdate()
+        {
             Move(1);
         }
 
@@ -54,13 +74,6 @@ namespace Controller2DProject.Controllers.States
             //Gets an acceleration value based on if we are accelerating (includes turning) 
             //or trying to decelerate (stop). As well as applying a multiplier if we're air borne.
             float accelRate = (Mathf.Abs(targetSpeed) > 0.01f) ? _playerData.RunAccelAmount * _playerData.AccelInAir : _playerData.RunDeccelAmount * _playerData.DeccelInAir;
-
-            // //Increase are acceleration and maxSpeed when at the apex of their jump, makes the jump feel a bit more bouncy, responsive and natural
-            // if (Mathf.Abs(_rb.linearVelocity.y) < _playerData.JumpHangTimeThreshold)
-            // {
-            //     accelRate *= _playerData.JumpHangAccelerationMult;
-            //     targetSpeed *= _playerData.JumpHangMaxSpeedMult;
-            // }
             
             //We won't slow the player down if they are moving in their desired direction but at a greater speed than their maxSpeed
             if (_playerData.DoConserveMomentum && Mathf.Abs(_rb.linearVelocity.x) > Mathf.Abs(targetSpeed) && Mathf.Sign(_rb.linearVelocity.x) == Mathf.Sign(targetSpeed) && Mathf.Abs(targetSpeed) > 0.01f)
