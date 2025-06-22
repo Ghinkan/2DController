@@ -10,8 +10,6 @@ namespace Controller2DProject.Controllers.States
         private readonly PlayerData _playerData;
         private readonly Rigidbody2D _rb;
 
-        private bool _isJumpCut;
-        
         public JumpState(PlayerControllerStates playerController, InputReader input, PlayerData playerData, Rigidbody2D rb)
         {
             _playerController = playerController;
@@ -24,25 +22,17 @@ namespace Controller2DProject.Controllers.States
         {
             _playerController.LastPressedJumpTime.Stop();
             _playerController.LastOnGroundTimer.Stop();
+            _playerController.IsJumpCut = false;
             
             Jump();
-
-            _isJumpCut = false;
-            if (!_input.IsJumpKeyPressed())
-            {
-                _isJumpCut = true;
-                _playerController.SetGravityScale(_playerData.GravityScale * _playerData.JumpCutGravityMult);
-            }
-            else
-                _playerController.SetGravityScale(_playerData.GravityScale * _playerData.JumpHangGravityMult);
         }
 
         public void Update()
         {
             if(!_input.IsJumpKeyPressed())
-                _isJumpCut = true;
+                _playerController.IsJumpCut = true;
             
-            if (_isJumpCut)
+            if (_playerController.IsJumpCut)
                 _playerController.SetGravityScale(_playerData.GravityScale * _playerData.JumpCutGravityMult);
             else if (Mathf.Abs(_rb.linearVelocity.y) < _playerData.JumpHangTimeThreshold)
                 _playerController.SetGravityScale(_playerData.GravityScale * _playerData.JumpHangGravityMult);

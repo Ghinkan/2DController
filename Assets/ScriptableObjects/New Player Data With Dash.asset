@@ -40,8 +40,8 @@ MonoBehaviour:
   doTurnOnWallJump: 0
   slideSpeed: -12
   slideAccel: 12
-  coyoteTime: 0.2
-  jumpInputBufferTime: 0.2
+  coyoteTime: 0.25
+  jumpInputBufferTime: 0.25
   dashAmount: 1
   dashSpeed: 20
   dashSleepTime: 0
@@ -49,5 +49,5 @@ MonoBehaviour:
   dashEndTime: 0.15
   dashEndSpeed: {x: 15, y: 15}
   dashEndRunLerp: 0
-  dashRefillTime: 0.1
-  dashInputBufferTime: 0.2
+  dashRefillTime: 0.15
+  dashInputBufferTime: 0.25

@@ -9,8 +9,6 @@ namespace Controller2DProject.Controllers.States
         private readonly InputReader _input;
         private readonly PlayerData _playerData;
         private readonly Rigidbody2D _rb;
-
-        private bool _isJumpCut;
         
         public FallState(PlayerControllerStates playerController, InputReader input, PlayerData playerData, Rigidbody2D rb)
         {
@@ -18,21 +16,6 @@ namespace Controller2DProject.Controllers.States
             _input = input;
             _playerData = playerData;
             _rb = rb;
-        }
-        
-        public void OnEnter()
-        {
-            _playerController.LastPressedJumpTime.Stop();
-            _playerController.LastOnGroundTimer.Stop();
-            
-            _isJumpCut = false;
-            if (!_input.IsJumpKeyPressed())
-            {
-                _isJumpCut = true;
-                _playerController.SetGravityScale(_playerData.GravityScale * _playerData.JumpCutGravityMult);
-            }
-            else
-                _playerController.SetGravityScale(_playerData.GravityScale * _playerData.FallGravityMult);
         }
         
         public void Update()
@@ -44,7 +27,7 @@ namespace Controller2DProject.Controllers.States
                 //Caps maximum fall speed, so when falling over large distances we don't accelerate to insanely high speeds
                 _rb.linearVelocity = new Vector2(_rb.linearVelocity.x, Mathf.Max(_rb.linearVelocity.y, -_playerData.MaxFastFallSpeed));
             }
-            else if (_isJumpCut)
+            else if (_playerController.IsJumpCut)
             {
                 //Higher gravity if jump button released
                 _playerController.SetGravityScale(_playerData.GravityScale * _playerData.JumpCutGravityMult);
@@ -62,6 +45,11 @@ namespace Controller2DProject.Controllers.States
         public void FixedUpdate()
         {
             Move(1);
+        }
+
+        public void OnExit()
+        {
+            _playerController.IsJumpCut = false;
         }
 
         private void Move(float lerpAmount)

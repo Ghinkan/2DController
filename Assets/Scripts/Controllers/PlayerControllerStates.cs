@@ -38,6 +38,7 @@ namespace Controller2DProject.Controllers
         private DashState _dashState;
         
         public bool IsFacingRight { get; private set; }
+        public bool IsJumpCut;
         
         private void Awake()
         {
@@ -164,12 +165,12 @@ namespace Controller2DProject.Controllers
         
         private void Update()
         {
+            UpdateWallAndGroundSensors();
             _stateMachine.Update();
         }
 
         private void FixedUpdate()
         {
-            UpdateWallAndGroundSensors();
             _stateMachine.FixedUpdate();
         }
         
@@ -179,13 +180,13 @@ namespace Controller2DProject.Controllers
             _frontWallSensor.Cast();
             _backWallSensor.Cast();
 
-            if (_groundSensor.HasDetectedHit())
+            if (_groundSensor.HasDetectedHit() && _stateMachine.CurrentState is not JumpState)
                 LastOnGroundTimer.Restart(_playerData.CoyoteTime);
             
-            if (IsWallOnRight())
+            if (IsWallOnRight() && _stateMachine.CurrentState is not WallJumpState)
                 LastOnWallRightTime.Restart(_playerData.CoyoteTime);
 
-            if (IsWallOnLeft())
+            if (IsWallOnLeft() && _stateMachine.CurrentState is not WallJumpState)
                 LastOnWallLeftTime.Restart(_playerData.CoyoteTime);
 
             float maxWallTime = Mathf.Max(LastOnWallLeftTime.CurrentTime, LastOnWallRightTime.CurrentTime);
