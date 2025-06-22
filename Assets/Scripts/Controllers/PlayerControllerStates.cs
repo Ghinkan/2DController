@@ -20,33 +20,14 @@ namespace Controller2DProject.Controllers
 
         private Rigidbody2D _rb;
         private Transform _tr;
-
-        public bool IsFacingRight { get; private set; }
-        public bool IsJumping { get; private set; }
-        public bool IsWallJumping { get; private set; }
-        public bool IsDashing { get; private set; }
-
-        //Timers
+        
         public CountdownTimer LastOnGroundTimer;
         public CountdownTimer LastOnWallTimer;
         public CountdownTimer LastOnWallRightTime;
         public CountdownTimer LastOnWallLeftTime;
         public CountdownTimer LastPressedJumpTime;
         public CountdownTimer LastPressedDashTime;
-
-        //Jump
-        public bool IsJumpCut;
-
-        //Wall Jump
-        private float _wallJumpStartTime;
-        private int _lastWallJumpDir;
-
-        //Dash
-        private int _dashesLeft;
-        private bool _dashRefilling;
-        private Vector2 _lastDashDir;
-        private bool _isDashAttacking;
-
+        
         private StateMachine _stateMachine;
         private IdleState _idleState;
         private RunState _runState;
@@ -55,7 +36,10 @@ namespace Controller2DProject.Controllers
         private WallSlide _wallSlide;
         private WallJumpState _wallJumpState;
         private DashState _dashState;
-
+        
+        public bool IsFacingRight { get; private set; }
+        public bool IsJumpCut;
+        
         private void Awake()
         {
             _tr = transform;
@@ -83,37 +67,37 @@ namespace Controller2DProject.Controllers
             _wallJumpState = new WallJumpState(this, _input, _playerData, _rb);
             _dashState = new DashState(this, _input, _playerData, _rb);
 
-            At(_idleState, _runState, () => IsGrounded() && _input.Direction.x != 0);
-            At(_idleState, _jumpState,    () => CanJump() && LastPressedJumpTime.IsRunning);
+            At(_idleState, _runState, () => IsGrounded() && HaveHorizontalInput());
+            At(_idleState, _jumpState,    () => CanJump());
             At(_idleState, _fallState,    () => LastOnGroundTimer.IsFinished);
             
-            At(_runState, _idleState,     () => Mathf.Abs(_rb.linearVelocityX) <= 0 && _input.Direction.x == 0);
-            At(_runState, _jumpState,     () => CanJump() && LastPressedJumpTime.IsRunning);
+            At(_runState, _idleState,     () => IsIdle() && !HaveHorizontalInput());
+            At(_runState, _jumpState,     () => CanJump());
             At(_runState, _fallState,     () => LastOnGroundTimer.IsFinished);
             
-            At(_jumpState, _fallState,    () => _rb.linearVelocityY < 0);
-            At(_jumpState, _idleState,    () => IsGrounded() && Mathf.Abs(_rb.linearVelocityX) <= 0);
-            At(_jumpState, _runState,     () => IsGrounded() && _input.Direction.x != 0);
-            At(_wallSlide, _wallJumpState, () => CanWallJump() && LastPressedJumpTime.IsRunning);
+            At(_jumpState, _fallState,    () => IsFalling());
+            At(_jumpState, _idleState,    () => IsGrounded() && IsIdle());
+            At(_jumpState, _runState,     () => IsGrounded() && HaveHorizontalInput());
+            At(_wallSlide, _wallJumpState, () => CanWallJump());
             
-            At(_fallState, _idleState,    () => IsGrounded() && Mathf.Abs(_rb.linearVelocityX) <= 0);
-            At(_fallState, _runState,     () => IsGrounded() && _input.Direction.x != 0);
-            At(_fallState, _wallSlide, () => CanSlide() && ((LastOnWallLeftTime.IsRunning && _input.Direction.x < 0) || (LastOnWallRightTime.IsRunning && _input.Direction.x > 0)));
-            At(_fallState, _wallJumpState, () => CanWallJump() && LastPressedJumpTime.IsRunning);
+            At(_fallState, _idleState,    () => IsGrounded() && IsIdle());
+            At(_fallState, _runState,     () => IsGrounded() && HaveHorizontalInput());
+            At(_fallState, _wallSlide, () => CanSlide());
+            At(_fallState, _wallJumpState, () => CanWallJump());
             
-            At(_wallSlide, _idleState, () => IsGrounded() && Mathf.Abs(_rb.linearVelocityX) <= 0);
-            At(_wallSlide, _runState, () => IsGrounded() && _input.Direction.x != 0);
-            At(_wallSlide, _fallState, () => !(CanSlide() && ((LastOnWallLeftTime.IsRunning && _input.Direction.x < 0) || (LastOnWallRightTime.IsRunning && _input.Direction.x > 0))));
-            At(_wallSlide, _wallJumpState, () => CanWallJump() && LastPressedJumpTime.IsRunning);
+            At(_wallSlide, _idleState, () => IsGrounded() && IsIdle());
+            At(_wallSlide, _runState, () => IsGrounded() && HaveHorizontalInput());
+            At(_wallSlide, _fallState, () => !CanSlide());
+            At(_wallSlide, _wallJumpState, () => CanWallJump());
             
-            At(_wallJumpState, _fallState,    () => _rb.linearVelocityY < 0);
-            At(_wallJumpState, _idleState,    () => IsGrounded() && Mathf.Abs(_rb.linearVelocityX) <= 0);
-            At(_wallJumpState, _runState,     () => IsGrounded() && _input.Direction.x != 0);
+            At(_wallJumpState, _fallState,    () => IsFalling());
+            At(_wallJumpState, _idleState,    () => IsGrounded() && IsIdle());
+            At(_wallJumpState, _runState,     () => IsGrounded() && HaveHorizontalInput());
             
             Any(_dashState, () => _dashState.DashesLeft > 0 && LastPressedDashTime.IsRunning);
             At(_dashState, _runState, () => !_dashState.IsDashing && IsGrounded());
             At(_dashState, _fallState, () => !_dashState.IsDashing && (LastOnGroundTimer.IsFinished));
-            At(_dashState, _wallSlide, () => !_dashState.IsDashing && (CanSlide() && ((LastOnWallLeftTime.IsRunning && _input.Direction.x < 0) || (LastOnWallRightTime.IsRunning && _input.Direction.x > 0))));
+            At(_dashState, _wallSlide, () => !_dashState.IsDashing && CanSlide());
             
             _stateMachine.SetState(_idleState);
         }
@@ -178,12 +162,6 @@ namespace Controller2DProject.Controllers
             scale.x = Mathf.Abs(scale.x) * (IsFacingRight ? 1 : -1);
             _tr.localScale = scale;
         }
-
-        private bool IsGrounded()
-        {
-            _groundSensor.Cast();
-            return _groundSensor.HasDetectedHit();
-        }
         
         private void Update()
         {
@@ -192,38 +170,28 @@ namespace Controller2DProject.Controllers
 
         private void FixedUpdate()
         {
-            //CollisionsChecks
-            if (!IsDashing && !IsJumping)
-            {
-                _groundSensor.Cast();
-                _frontWallSensor.Cast();
-                _backWallSensor.Cast();
-            
-                if (!IsDashing && !IsJumping)
-                {
-                    if (_groundSensor.HasDetectedHit())
-                    {
-                        LastOnGroundTimer.Restart(_playerData.CoyoteTime);
-                    }
-            
-                    //Two checks needed for both left and right walls since whenever the play turns the wall checkPoints swap sides
-                    if (((_frontWallSensor.HasDetectedHit() && IsFacingRight) || (_backWallSensor.HasDetectedHit() && !IsFacingRight)) && !IsWallJumping)
-                    {
-                        LastOnWallRightTime.Restart(_playerData.CoyoteTime);
-                    }
-            
-                    if (((_frontWallSensor.HasDetectedHit() && !IsFacingRight) || (_backWallSensor.HasDetectedHit() && IsFacingRight)) && !IsWallJumping)
-                    {
-                        LastOnWallLeftTime.Restart(_playerData.CoyoteTime);
-                    }
-                    
-                    float maxWallTime = Mathf.Max(LastOnWallLeftTime.CurrentTime, LastOnWallRightTime.CurrentTime);
-                    if(maxWallTime > 0)
-                        LastOnWallTimer.Restart(maxWallTime);
-                }
-            }
-            
+            UpdateWallAndGroundSensors();
             _stateMachine.FixedUpdate();
+        }
+        
+        private void UpdateWallAndGroundSensors()
+        {
+            _groundSensor.Cast();
+            _frontWallSensor.Cast();
+            _backWallSensor.Cast();
+
+            if (_groundSensor.HasDetectedHit())
+                LastOnGroundTimer.Restart(_playerData.CoyoteTime);
+            
+            if (IsWallOnRight())
+                LastOnWallRightTime.Restart(_playerData.CoyoteTime);
+
+            if (IsWallOnLeft())
+                LastOnWallLeftTime.Restart(_playerData.CoyoteTime);
+
+            float maxWallTime = Mathf.Max(LastOnWallLeftTime.CurrentTime, LastOnWallRightTime.CurrentTime);
+            if (maxWallTime > 0)
+                LastOnWallTimer.Restart(maxWallTime);
         }
 
         public void SetGravityScale(float scale)
@@ -231,20 +199,53 @@ namespace Controller2DProject.Controllers
             _rb.gravityScale = scale;
         }
         
+        private bool IsIdle()
+        {
+            return Mathf.Abs(_rb.linearVelocityX) <= 0f;
+        }
+
+        private bool HaveHorizontalInput()
+        {
+            return Mathf.Abs(_input.Direction.x) > 0.01f;
+        }
+
+        private bool IsFalling()
+        {
+            return _rb.linearVelocityY < 0f;
+        }
+        
+        private bool IsGrounded()
+        {
+            _groundSensor.Cast();
+            return _groundSensor.HasDetectedHit();
+        }
+        
+        private bool IsWallOnRight()
+        {
+            return (_frontWallSensor.HasDetectedHit() && IsFacingRight) ||
+                (_backWallSensor.HasDetectedHit() && !IsFacingRight);
+        }
+
+        private bool IsWallOnLeft()
+        {
+            return (_frontWallSensor.HasDetectedHit() && !IsFacingRight) ||
+                (_backWallSensor.HasDetectedHit() && IsFacingRight);
+        }
+        
         private bool CanJump()
         {
-            return LastOnGroundTimer.IsRunning && !IsJumping;
+            return LastOnGroundTimer.IsRunning && LastPressedJumpTime.IsRunning;
         }
 
         private bool CanWallJump()
         {
-            return LastPressedJumpTime.IsRunning && LastOnWallTimer.IsRunning && LastOnGroundTimer.IsFinished && (!IsWallJumping ||
-                (LastOnWallRightTime.IsRunning && _lastWallJumpDir == 1) || (LastOnWallLeftTime.IsRunning && _lastWallJumpDir == -1));
+            return LastPressedJumpTime.IsRunning && LastOnWallTimer.IsRunning && LastOnGroundTimer.IsFinished;
         }
-
+        
         private bool CanSlide()
         {
-            return LastOnWallTimer.IsRunning && !IsJumping && !IsWallJumping && !IsDashing && LastOnGroundTimer.IsFinished;
+            return LastOnWallTimer.IsRunning && LastOnGroundTimer.IsFinished &&
+                ((LastOnWallLeftTime.IsRunning && _input.Direction.x < 0) || (LastOnWallRightTime.IsRunning && _input.Direction.x > 0));;
         }
 
         private void OnDrawGizmos()
