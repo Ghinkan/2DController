@@ -23,5 +23,4 @@ namespace Controller2DProject.Controllers.States
             _playerController.SetGravityScale(_playerData.GravityScale);
         }
     }
-
 }

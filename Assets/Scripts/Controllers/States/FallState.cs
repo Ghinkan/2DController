@@ -55,12 +55,12 @@ namespace Controller2DProject.Controllers.States
             //or trying to decelerate (stop). As well as applying a multiplier if we're air borne.
             float accelRate = (Mathf.Abs(targetSpeed) > 0.01f) ? _playerData.RunAccelAmount * _playerData.AccelInAir : _playerData.RunDeccelAmount * _playerData.DeccelInAir;
 
-            //Increase are acceleration and maxSpeed when at the apex of their jump, makes the jump feel a bit more bouncy, responsive and natural
-            if (Mathf.Abs(_rb.linearVelocity.y) < _playerData.JumpHangTimeThreshold)
-            {
-                accelRate *= _playerData.JumpHangAccelerationMult;
-                targetSpeed *= _playerData.JumpHangMaxSpeedMult;
-            }
+            // //Increase are acceleration and maxSpeed when at the apex of their jump, makes the jump feel a bit more bouncy, responsive and natural
+            // if (Mathf.Abs(_rb.linearVelocity.y) < _playerData.JumpHangTimeThreshold)
+            // {
+            //     accelRate *= _playerData.JumpHangAccelerationMult;
+            //     targetSpeed *= _playerData.JumpHangMaxSpeedMult;
+            // }
             
             //We won't slow the player down if they are moving in their desired direction but at a greater speed than their maxSpeed
             if (_playerData.DoConserveMomentum && Mathf.Abs(_rb.linearVelocity.x) > Mathf.Abs(targetSpeed) && Mathf.Sign(_rb.linearVelocity.x) == Mathf.Sign(targetSpeed) && Mathf.Abs(targetSpeed) > 0.01f)

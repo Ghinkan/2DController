@@ -47,7 +47,7 @@ MonoBehaviour:
   DashEndTime: 0.15
   DashEndSpeed: {x: 15, y: 15}
   DashEndRunLerp: 0
-  DashRefillTime: 0.1
+  DashRefillTime: 0.15
   CoyoteTime: 0.2
   JumpInputBufferTime: 0.2
-  DashInputBufferTime: 0.2
+  DashInputBufferTime: 0.25

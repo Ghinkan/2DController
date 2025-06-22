@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using Controller2DProject.Controllers.Inputs;
 using Controller2DProject.Controllers.States;
 using Sensors2D;
@@ -33,7 +32,7 @@ namespace Controller2DProject.Controllers
         public CountdownTimer LastOnWallRightTime;
         public CountdownTimer LastOnWallLeftTime;
         public CountdownTimer LastPressedJumpTime;
-        private CountdownTimer _lastPressedDashTime;
+        public CountdownTimer LastPressedDashTime;
 
         //Jump
         public bool IsJumpCut;
@@ -55,6 +54,7 @@ namespace Controller2DProject.Controllers
         private FallState _fallState;
         private WallSlide _wallSlide;
         private WallJumpState _wallJumpState;
+        private DashState _dashState;
 
         private void Awake()
         {
@@ -66,7 +66,7 @@ namespace Controller2DProject.Controllers
             LastOnWallRightTime  = new CountdownTimer(0f, this);
             LastOnWallLeftTime   = new CountdownTimer(0f, this);
             LastPressedJumpTime = new CountdownTimer(0f, this);
-            _lastPressedDashTime = new CountdownTimer(0f, this);
+            LastPressedDashTime = new CountdownTimer(0f, this);
             
             SetupStateMachine();
         }
@@ -81,8 +81,9 @@ namespace Controller2DProject.Controllers
             _fallState = new FallState(this,_input, _playerData, _rb);
             _wallSlide = new WallSlide(this, _input, _playerData, _rb);
             _wallJumpState = new WallJumpState(this, _input, _playerData, _rb);
+            _dashState = new DashState(this, _input, _playerData, _rb);
 
-            At(_idleState, _runState, () => _input.Direction.x != 0);
+            At(_idleState, _runState, () => IsGrounded() && _input.Direction.x != 0);
             At(_idleState, _jumpState,    () => CanJump() && LastPressedJumpTime.IsRunning);
             At(_idleState, _fallState,    () => LastOnGroundTimer.IsFinished);
             
@@ -109,6 +110,11 @@ namespace Controller2DProject.Controllers
             At(_wallJumpState, _idleState,    () => IsGrounded() && Mathf.Abs(_rb.linearVelocityX) <= 0);
             At(_wallJumpState, _runState,     () => IsGrounded() && _input.Direction.x != 0);
             
+            Any(_dashState, () => _dashState.DashesLeft > 0 && LastPressedDashTime.IsRunning);
+            At(_dashState, _runState, () => !_dashState.IsDashing && IsGrounded());
+            At(_dashState, _fallState, () => !_dashState.IsDashing && (LastOnGroundTimer.IsFinished));
+            At(_dashState, _wallSlide, () => !_dashState.IsDashing && (CanSlide() && ((LastOnWallLeftTime.IsRunning && _input.Direction.x < 0) || (LastOnWallRightTime.IsRunning && _input.Direction.x > 0))));
+            
             _stateMachine.SetState(_idleState);
         }
         
@@ -117,7 +123,7 @@ namespace Controller2DProject.Controllers
             _stateMachine.AddTransition(from, to, condition);
         }
         
-        private void Any<T>(IState to, Func<bool> condition)
+        private void Any(IState to, Func<bool> condition)
         {
             _stateMachine.AddAnyTransition(to, condition);
         }
@@ -161,7 +167,7 @@ namespace Controller2DProject.Controllers
 
         private void OnDashInput()
         {
-            _lastPressedDashTime.Restart(_playerData.DashInputBufferTime);
+            LastPressedDashTime.Restart(_playerData.DashInputBufferTime);
         }
         
         private void Turn(bool faceRight)
@@ -224,72 +230,6 @@ namespace Controller2DProject.Controllers
         {
             _rb.gravityScale = scale;
         }
-
-        private void Sleep(float duration)
-        {
-            //Method used so we don't need to call StartCoroutine everywhere
-            //nameof() notation means we don't need to input a string directly.
-            //Removes chance of spelling mistakes and will improve error messages if any
-            StartCoroutine(nameof(PerformSleep), duration);
-        }
-
-        private IEnumerator PerformSleep(float duration)
-        {
-            Time.timeScale = 0;
-            yield return new WaitForSecondsRealtime(duration); //Must be Realtime since timeScale with be 0 
-            Time.timeScale = 1;
-        }
-        
-        private IEnumerator StartDash(Vector2 dir)
-        {
-            //Overall this method of dashing aims to mimic Celeste, if you're looking for
-            // a more physics-based approach try a method similar to that used in the jump
-            
-            LastOnGroundTimer.Stop();
-            _lastPressedDashTime.Stop();
-
-            float startTime = Time.time;
-
-            _dashesLeft--;
-            _isDashAttacking = true;
-
-            SetGravityScale(0);
-
-            //We keep the player's velocity at the dash speed during the "attack" phase (in celeste the first 0.15s)
-            while (Time.time - startTime <= _playerData.DashAttackTime)
-            {
-                _rb.linearVelocity = dir.normalized * _playerData.DashSpeed;
-                //Pauses the loop until the next frame, creating something of a Update loop. 
-                //This is a cleaner implementation opposed to multiple timers and this coroutine approach is actually what is used in Celeste :D
-                yield return null;
-            }
-
-            startTime = Time.time;
-
-            _isDashAttacking = false;
-
-            //Begins the "end" of our dash where we return some control to the player but still limit run acceleration (see Update() and Run())
-            SetGravityScale(_playerData.GravityScale);
-            _rb.linearVelocity = _playerData.DashEndSpeed * dir.normalized;
-
-            while (Time.time - startTime <= _playerData.DashEndTime)
-            {
-                yield return null;
-            }
-
-            //Dash over
-            IsDashing = false;
-        }
-
-        //Short period before the player is able to dash again
-        private IEnumerator RefillDash(int amount)
-        {
-            //SHoet cooldown, so we can't constantly dash along the ground, again this is the implementation in Celeste, feel free to change it up
-            _dashRefilling = true;
-            yield return new WaitForSeconds(_playerData.DashRefillTime);
-            _dashRefilling = false;
-            _dashesLeft = Mathf.Min(_playerData.DashAmount, _dashesLeft + 1);
-        }
         
         private bool CanJump()
         {
@@ -300,16 +240,6 @@ namespace Controller2DProject.Controllers
         {
             return LastPressedJumpTime.IsRunning && LastOnWallTimer.IsRunning && LastOnGroundTimer.IsFinished && (!IsWallJumping ||
                 (LastOnWallRightTime.IsRunning && _lastWallJumpDir == 1) || (LastOnWallLeftTime.IsRunning && _lastWallJumpDir == -1));
-        }
-
-        private bool CanDash()
-        {
-            if (!IsDashing && _dashesLeft < _playerData.DashAmount && LastOnGroundTimer.IsRunning && !_dashRefilling)
-            {
-                StartCoroutine(nameof(RefillDash), 1);
-            }
-
-            return _dashesLeft > 0;
         }
 
         private bool CanSlide()
