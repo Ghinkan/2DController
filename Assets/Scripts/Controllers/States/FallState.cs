@@ -46,12 +46,7 @@ namespace Controller2DProject.Controllers.States
         {
             Move(1);
         }
-
-        public void OnExit()
-        {
-            _playerController.IsJumpCut = false;
-        }
-
+        
         private void Move(float lerpAmount)
         {
             //Calculate the direction we want to move in and our desired velocity

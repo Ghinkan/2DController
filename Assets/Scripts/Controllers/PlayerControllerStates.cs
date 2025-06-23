@@ -69,11 +69,11 @@ namespace Controller2DProject.Controllers
 
             At(_idleState, _runState, () => IsGrounded() && HaveHorizontalInput());
             At(_idleState, _jumpState,    () => CanJump());
-            At(_idleState, _fallState,    () => LastOnGroundTimer.IsFinished);
+            At(_idleState, _fallState,    () => !IsGrounded());
             
             At(_runState, _idleState,     () => IsIdle() && !HaveHorizontalInput());
             At(_runState, _jumpState,     () => CanJump());
-            At(_runState, _fallState,     () => LastOnGroundTimer.IsFinished);
+            At(_runState, _fallState,     () => !IsGrounded());
             
             At(_jumpState, _fallState,    () => IsFalling());
             At(_jumpState, _idleState,    () => IsGrounded() && IsIdle());
@@ -96,7 +96,7 @@ namespace Controller2DProject.Controllers
             
             Any(_dashState, () => _dashState.DashesLeft > 0 && LastPressedDashTime.IsRunning);
             At(_dashState, _runState, () => !_dashState.IsDashing && IsGrounded());
-            At(_dashState, _fallState, () => !_dashState.IsDashing && (LastOnGroundTimer.IsFinished));
+            At(_dashState, _fallState, () => !_dashState.IsDashing && !IsGrounded());
             At(_dashState, _wallSlide, () => !_dashState.IsDashing && CanSlide());
             
             _stateMachine.SetState(_idleState);
@@ -136,7 +136,7 @@ namespace Controller2DProject.Controllers
 
         private void CheckDirectionToFace(Vector2 direction)
         {
-            if (Mathf.Abs(direction.x) < Mathf.Epsilon) return;
+            if (Mathf.Abs(direction.x) < 0.01f) return;
 
             bool wantsToFaceRight = direction.x > 0;
             if (wantsToFaceRight != IsFacingRight)
@@ -216,8 +216,7 @@ namespace Controller2DProject.Controllers
         
         private bool IsGrounded()
         {
-            _groundSensor.Cast();
-            return _groundSensor.HasDetectedHit();
+            return LastOnGroundTimer.IsRunning;
         }
         
         private bool IsWallOnRight()
@@ -234,18 +233,18 @@ namespace Controller2DProject.Controllers
         
         private bool CanJump()
         {
-            return LastOnGroundTimer.IsRunning && LastPressedJumpTime.IsRunning;
+            return IsGrounded() && LastPressedJumpTime.IsRunning;
         }
 
         private bool CanWallJump()
         {
-            return LastPressedJumpTime.IsRunning && LastOnWallTimer.IsRunning && LastOnGroundTimer.IsFinished;
+            return LastPressedJumpTime.IsRunning && LastOnWallTimer.IsRunning && !IsGrounded();
         }
         
         private bool CanSlide()
         {
-            return LastOnWallTimer.IsRunning && LastOnGroundTimer.IsFinished &&
-                ((LastOnWallLeftTime.IsRunning && _input.Direction.x < 0) || (LastOnWallRightTime.IsRunning && _input.Direction.x > 0));;
+            return LastOnWallTimer.IsRunning && !IsGrounded() &&
+                ((LastOnWallLeftTime.IsRunning && _input.Direction.x < 0) || (LastOnWallRightTime.IsRunning && _input.Direction.x > 0));
         }
 
         private void OnDrawGizmos()

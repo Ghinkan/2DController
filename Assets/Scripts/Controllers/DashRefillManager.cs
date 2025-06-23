@@ -31,7 +31,6 @@ namespace Controller2DProject.Controllers
 
             while (_refillQueue > 0 && DashesLeft < _playerData.DashAmount)
             {
-                // await Task.Delay((int)(_playerData.DashRefillTime * 1000));
                 await Task.Delay(TimeSpan.FromSeconds(_playerData.DashRefillTime));
                 
                 DashesLeft = Mathf.Min(_playerData.DashAmount, DashesLeft + 1);
