@@ -40,7 +40,7 @@ namespace Controller2DProject.Controllers
         public bool IsFacingRight { get; private set; }
         public bool IsJumpCut;
         
-        private const float DirectionThreshold = 0.01f;
+        private const float MovementThreshold = 0.01f;
         private const float RightRotation = 0f;
         private const float LeftRotation = 180f;
         
@@ -204,12 +204,12 @@ namespace Controller2DProject.Controllers
         
         private bool IsIdle()
         {
-            return Mathf.Abs(_rb.linearVelocityX) <= 0f;
+            return Mathf.Abs(_rb.linearVelocityX) <= MovementThreshold;
         }
 
         private bool HaveHorizontalInput()
         {
-            return Mathf.Abs(_input.Direction.x) > DirectionThreshold;
+            return Mathf.Abs(_input.Direction.x) > MovementThreshold;
         }
 
         private bool IsFalling()

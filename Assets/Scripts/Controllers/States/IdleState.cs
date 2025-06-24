@@ -20,7 +20,13 @@ namespace Controller2DProject.Controllers.States
 
         public void OnEnter()
         {
+            _rb.linearVelocityX = 0f;
             _playerController.SetGravityScale(_playerData.GravityScale);
+        }
+
+        public void Update()
+        {
+            _rb.linearVelocityX = 0f;
         }
     }
 }
