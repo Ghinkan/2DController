@@ -40,6 +40,10 @@ namespace Controller2DProject.Controllers
         public bool IsFacingRight { get; private set; }
         public bool IsJumpCut;
         
+        private const float DirectionThreshold = 0.01f;
+        private const float RightRotation = 0f;
+        private const float LeftRotation = 180f;
+        
         private void Awake()
         {
             _tr = transform;
@@ -136,8 +140,8 @@ namespace Controller2DProject.Controllers
 
         private void CheckDirectionToFace(Vector2 direction)
         {
-            if (Mathf.Abs(direction.x) < 0.01f) return;
-
+            if (!HaveHorizontalInput()) return;
+            
             bool wantsToFaceRight = direction.x > 0;
             if (wantsToFaceRight != IsFacingRight)
                 Turn(wantsToFaceRight);
@@ -157,10 +161,9 @@ namespace Controller2DProject.Controllers
         private void Turn(bool faceRight)
         {
             IsFacingRight = faceRight;
-
-            Vector3 scale = _tr.localScale;
-            scale.x = Mathf.Abs(scale.x) * (IsFacingRight ? 1 : -1);
-            _tr.localScale = scale;
+            Vector3 rotation = _tr.eulerAngles;
+            rotation.y = IsFacingRight ? RightRotation : LeftRotation;
+            _tr.eulerAngles = rotation;
         }
         
         private void Update()
@@ -206,7 +209,7 @@ namespace Controller2DProject.Controllers
 
         private bool HaveHorizontalInput()
         {
-            return Mathf.Abs(_input.Direction.x) > 0.01f;
+            return Mathf.Abs(_input.Direction.x) > DirectionThreshold;
         }
 
         private bool IsFalling()
