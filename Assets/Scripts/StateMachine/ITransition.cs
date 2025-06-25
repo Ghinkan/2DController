@@ -1,5 +1,4 @@
-﻿using ComboProject.Predicates;
-namespace UnityUtils.StateMachine
+﻿namespace UnityUtils.StateMachine
 {
     public interface ITransition
     {

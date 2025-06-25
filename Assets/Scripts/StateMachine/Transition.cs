@@ -1,5 +1,4 @@
 ﻿using System;
-using ComboProject.Predicates;
 namespace UnityUtils.StateMachine
 {
     public abstract class Transition

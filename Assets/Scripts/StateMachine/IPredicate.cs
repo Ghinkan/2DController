@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-namespace ComboProject.Predicates
+namespace UnityUtils.StateMachine
 {
     public interface IPredicate
     {
