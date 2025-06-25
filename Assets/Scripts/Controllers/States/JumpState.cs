@@ -25,6 +25,8 @@ namespace Controller2DProject.Controllers.States
             _playerController.IsJumpCut = false;
             
             Jump();
+            
+            _playerController.Animator.Play("Jump");
         }
 
         public void Update()

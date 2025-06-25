@@ -17,7 +17,12 @@ namespace Controller2DProject.Controllers.States
             _playerData = playerData;
             _rb = rb;
         }
-        
+
+        public void OnEnter()
+        {
+            _playerController.Animator.Play("Fall");
+        }
+
         public void Update()
         {
             if (_rb.linearVelocity.y < 0 && _input.Direction.y < 0)

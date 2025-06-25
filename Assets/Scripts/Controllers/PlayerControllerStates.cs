@@ -12,6 +12,7 @@ namespace Controller2DProject.Controllers
     {
         [SerializeField] private InputReader _input;
         [SerializeField] private PlayerData _playerData;
+        public Animator Animator;
         
         [SerializeField] private bool _isInDebugMode;
         [SerializeField] private BoxSensorOverlap2D _groundSensor;

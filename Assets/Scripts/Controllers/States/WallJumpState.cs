@@ -28,6 +28,8 @@ namespace Controller2DProject.Controllers.States
             _playerController.LastOnWallLeftTime.Stop();
             _playerController.IsJumpCut = false;
             WallJump(dir);
+            
+            _playerController.Animator.Play("WallJump");
         }
         
         public void Update()

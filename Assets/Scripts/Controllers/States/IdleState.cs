@@ -22,6 +22,8 @@ namespace Controller2DProject.Controllers.States
         {
             _rb.linearVelocityX = 0f;
             _playerController.SetGravityScale(_playerData.GravityScale);
+            
+            _playerController.Animator.Play("Idle");
         }
 
         public void Update()

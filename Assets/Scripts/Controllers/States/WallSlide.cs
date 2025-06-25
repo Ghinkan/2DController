@@ -21,6 +21,7 @@ namespace Controller2DProject.Controllers.States
         public void OnEnter()
         {
             _playerController.SetGravityScale(0);
+            _playerController.Animator.Play("WallSlide");
         }
 
         public void FixedUpdate()

@@ -21,6 +21,7 @@ namespace Controller2DProject.Controllers.States
         public void OnEnter()
         {
             _playerController.SetGravityScale(_playerData.GravityScale);
+            _playerController.Animator.Play("Run");
         }
 
         public void FixedUpdate()
