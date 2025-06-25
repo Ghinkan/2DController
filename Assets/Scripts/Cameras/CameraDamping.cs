@@ -3,7 +3,7 @@ using Unity.Cinemachine;
 using UnityEngine;
 namespace Controller2DProject.Controllers.Cameras
 {
-    [RequireComponent(typeof(CameraController))]
+    [RequireComponent(typeof(CinemachinePositionComposer))]
     public class CameraDamping : MonoBehaviour
     {
         [SerializeField] private float _fallSpeedYDampingThreshold;
@@ -11,30 +11,38 @@ namespace Controller2DProject.Controllers.Cameras
         [SerializeField] private float _transitionTime;
         
         private CinemachinePositionComposer _positionComposer;
+        private Transform _playerTransform;
         private float _normalDamping;
-        
-        private void Start()
-        {
-            _positionComposer = CameraManager.Instance.CurrentCamera.GetComponent<CinemachinePositionComposer>();
-            _normalDamping = _positionComposer.Damping.y;
-        }
-
+        private float _lastYVelocity;
         private bool _isTransitioning;
         private bool _isFalling;
 
-        public void UpdateDamping(float verticalVelocity)
+        public void Awake()
         {
+            _positionComposer = GetComponent<CinemachinePositionComposer>();
+            _normalDamping = _positionComposer.Damping.y;
+            _playerTransform = _positionComposer.FollowTarget.transform;
+        }
+        
+        public void Update()
+        {
+            float currentYPosition = _playerTransform.position.y;
+            float yDelta = (currentYPosition - _lastYVelocity) / Time.deltaTime;
+            _lastYVelocity = currentYPosition;
+            
+            UpdateDamping(yDelta);
+        }
+        
+        private void UpdateDamping(float verticalVelocity)
+        {        
             if (ShouldStartFalling(verticalVelocity))
                 TransitionToFallDamping();
             else if (ShouldReturnToNormal(verticalVelocity))
                 TransitionToNormalDamping();
         }
 
-        private bool ShouldStartFalling(float verticalVelocity) =>
-            verticalVelocity < _fallSpeedYDampingThreshold && !_isTransitioning && !_isFalling;
-
-        private bool ShouldReturnToNormal(float verticalVelocity) =>
-            verticalVelocity >= 0f && !_isTransitioning && _isFalling;
+        private bool ShouldStartFalling(float verticalVelocity) => verticalVelocity < _fallSpeedYDampingThreshold && !_isTransitioning && !_isFalling;
+        private bool ShouldReturnToNormal(float verticalVelocity) => verticalVelocity >= 0f && !_isTransitioning && _isFalling;
 
         private void TransitionToFallDamping()
         {

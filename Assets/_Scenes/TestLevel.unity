@@ -4103,83 +4103,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 14175881}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1831312259
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1831312260}
-  - component: {fileID: 1831312261}
-  - component: {fileID: 1831312263}
-  - component: {fileID: 1831312262}
-  m_Layer: 6
-  m_Name: CameraController
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1831312260
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1831312259}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 10, y: 48, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1831312261
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1831312259}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c98dcca01fa44b569bf3cdc8eca8b356, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _input: {fileID: 11400000, guid: d05eb6c39a525c24fa4ded65ca4867e9, type: 2}
-  _cameraHorizontalFollow: {fileID: 1831312263}
-  _cameraDamping: {fileID: 1831312262}
---- !u!114 &1831312262
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1831312259}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7d55382d2fd84f4c92fd2d1f9104ffd2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _fallSpeedYDampingThreshold: -15
-  _fallDamping: 0.15
-  _transitionTime: 0.35
---- !u!114 &1831312263
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1831312259}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5e4be26af9b343cabbfa19ea9d62e6e5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _rotationTime: 0.5
 --- !u!1 &1841214182
 GameObject:
   m_ObjectHideFlags: 0
@@ -4191,6 +4114,8 @@ GameObject:
   - component: {fileID: 1841214183}
   - component: {fileID: 1841214185}
   - component: {fileID: 1841214184}
+  - component: {fileID: 1841214187}
+  - component: {fileID: 1841214186}
   m_Layer: 0
   m_Name: CinemachineCamera
   m_TagString: Untagged
@@ -4287,6 +4212,35 @@ MonoBehaviour:
       BarrelClipping: 0.25
       Anamorphism: 0
   BlendHint: 0
+--- !u!114 &1841214186
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1841214182}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d55382d2fd84f4c92fd2d1f9104ffd2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _fallSpeedYDampingThreshold: -15
+  _fallDamping: 0.15
+  _transitionTime: 0.35
+--- !u!114 &1841214187
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1841214182}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5e4be26af9b343cabbfa19ea9d62e6e5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _input: {fileID: 11400000, guid: d05eb6c39a525c24fa4ded65ca4867e9, type: 2}
+  _rotationTime: 0.5
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -4294,5 +4248,4 @@ SceneRoots:
   - {fileID: 1748578584}
   - {fileID: 619394802}
   - {fileID: 1090614737}
-  - {fileID: 1831312260}
   - {fileID: 1680344534}

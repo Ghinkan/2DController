@@ -1,10 +1,14 @@
-﻿using DG.Tweening;
+﻿using System;
+using Controller2DProject.Controllers.Inputs;
+using DG.Tweening;
 using Unity.Cinemachine;
 using UnityEngine;
 namespace Controller2DProject.Controllers.Cameras
 {
+    [RequireComponent(typeof(CinemachinePositionComposer))]
     public class CameraHorizontalFollow : MonoBehaviour
     {
+        [SerializeField] private InputReader _input;
         [SerializeField] private float _rotationTime = 0.5f;
         
         private const float DirectionThreshold = 0.01f;
@@ -13,13 +17,23 @@ namespace Controller2DProject.Controllers.Cameras
         private float _offsetXAmount;
         private bool _isFacingRight = true;
         
-        private void Start()
+        public void Awake()
         {
-            _positionComposer = CameraManager.Instance.CurrentCamera.GetComponent<CinemachinePositionComposer>();
+            _positionComposer = GetComponent<CinemachinePositionComposer>();
             _offsetXAmount = _positionComposer.TargetOffset.x;
         }
         
-        public void CheckDirectionToFace(Vector2 direction)
+        private void OnEnable()
+        {
+            _input.Move += CheckDirectionToFace;
+        }
+
+        private void OnDisable()
+        {
+            _input.Move -= CheckDirectionToFace;
+        }
+
+        private void CheckDirectionToFace(Vector2 direction)
         {
             if (!ShouldUpdateCameraRotation(direction)) return;
 
