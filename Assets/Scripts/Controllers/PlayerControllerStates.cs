@@ -161,9 +161,9 @@ namespace Controller2DProject.Controllers
         private void Turn(bool faceRight)
         {
             IsFacingRight = faceRight;
-            Vector3 rotation = _tr.eulerAngles;
-            rotation.y = IsFacingRight ? RightRotation : LeftRotation;
-            _tr.eulerAngles = rotation;
+            Vector3 scale = _tr.localScale;
+            scale.x = Mathf.Abs(scale.x) * (IsFacingRight ? 1 : -1);
+            _tr.localScale = scale;
         }
         
         private void Update()
