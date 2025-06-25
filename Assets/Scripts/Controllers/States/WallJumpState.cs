@@ -26,6 +26,7 @@ namespace Controller2DProject.Controllers.States
             _playerController.LastOnGroundTimer.Stop();
             _playerController.LastOnWallRightTime.Stop();
             _playerController.LastOnWallLeftTime.Stop();
+            _playerController.LastOnWallTimer.Stop();
             _playerController.IsJumpCut = false;
             WallJump(dir);
             

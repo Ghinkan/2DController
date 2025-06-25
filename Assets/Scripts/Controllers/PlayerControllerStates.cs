@@ -85,6 +85,7 @@ namespace Controller2DProject.Controllers
             
             At(_fallState, _idleState,    () => IsGrounded() && IsIdle());
             At(_fallState, _runState,     () => IsGrounded() && HaveHorizontalInput());
+            At(_fallState, _jumpState,     () => CanJump());
             At(_fallState, _wallSlide, () => CanSlide());
             At(_fallState, _wallJumpState, () => CanWallJump());
             
@@ -96,6 +97,7 @@ namespace Controller2DProject.Controllers
             At(_wallJumpState, _fallState,    () => IsFalling());
             At(_wallJumpState, _idleState,    () => IsGrounded() && IsIdle());
             At(_wallJumpState, _runState,     () => IsGrounded() && HaveHorizontalInput());
+            At(_wallJumpState, _wallSlide,     () => CanSlide());
             
             Any(_dashState, () => _dashState.DashesLeft > 0 && LastPressedDashTime.IsRunning);
             At(_dashState, _runState, () => !_dashState.IsDashing && IsGrounded());
@@ -210,13 +212,18 @@ namespace Controller2DProject.Controllers
         {
             return Mathf.Abs(_input.Direction.x) > MovementThreshold;
         }
+        
+        private bool IsGrounded()
+        {
+            return _groundSensor.HasDetectedHit();
+        }
 
         private bool IsFalling()
         {
             return _rb.linearVelocityY < 0f;
         }
         
-        private bool IsGrounded()
+        private bool IsOnCoyoteTime()
         {
             return LastOnGroundTimer.IsRunning;
         }
@@ -235,7 +242,7 @@ namespace Controller2DProject.Controllers
         
         private bool CanJump()
         {
-            return IsGrounded() && LastPressedJumpTime.IsRunning;
+            return IsOnCoyoteTime() && LastPressedJumpTime.IsRunning;
         }
 
         private bool CanWallJump()
