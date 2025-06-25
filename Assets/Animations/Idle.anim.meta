@@ -1,8 +1,15 @@
 fileFormatVersion: 2
-guid: c15f11469d8a580429fa1d7df1b3bf39
+guid: 8b4bca35bb3e78b43ad321336761a756
 NativeFormatImporter:
   externalObjects: {}
   mainObjectFileID: 7400000
   userData: 
   assetBundleName: 
   assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 195707
+  packageName: Warrior Free Asset
+  packageVersion: 1.0
+  assetPath: Assets/Warrior free set/Aniamtion/Idle.anim
+  uploadId: 434362

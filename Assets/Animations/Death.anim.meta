@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: a6fdf3b62c5b8de418436d0859a8b671
+guid: 36684c15dec018a4ca8dcf9c646e3c15
 NativeFormatImporter:
   externalObjects: {}
   mainObjectFileID: 7400000
@@ -11,5 +11,5 @@ AssetOrigin:
   productId: 195707
   packageName: Warrior Free Asset
   packageVersion: 1.0
-  assetPath: Assets/Warrior free set/Aniamtion/jump.anim
+  assetPath: Assets/Warrior free set/Aniamtion/Death.anim
   uploadId: 434362

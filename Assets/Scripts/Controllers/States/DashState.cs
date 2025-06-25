@@ -48,6 +48,7 @@ namespace Controller2DProject.Controllers.States
             _dashDirection = GetDashDirection();
             
             _dashRefill.ConsumeDash();
+            _playerController.Animator.Play("Dash");
         }
         
         public void FixedUpdate()

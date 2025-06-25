@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: a6fdf3b62c5b8de418436d0859a8b671
+guid: 77d424ed653f20148bcfe92f576db678
 NativeFormatImporter:
   externalObjects: {}
   mainObjectFileID: 7400000
@@ -11,5 +11,5 @@ AssetOrigin:
   productId: 195707
   packageName: Warrior Free Asset
   packageVersion: 1.0
-  assetPath: Assets/Warrior free set/Aniamtion/jump.anim
+  assetPath: Assets/Warrior free set/Aniamtion/Edge-Grab.anim
   uploadId: 434362

@@ -29,7 +29,7 @@ namespace Controller2DProject.Controllers.States
             _playerController.IsJumpCut = false;
             WallJump(dir);
             
-            _playerController.Animator.Play("WallJump");
+            _playerController.Animator.Play("Jump");
         }
         
         public void Update()
