@@ -41,8 +41,6 @@ namespace Controller2DProject.Controllers
         public bool IsJumpCut;
         
         private const float MovementThreshold = 0.01f;
-        private const float RightRotation = 0f;
-        private const float LeftRotation = 180f;
         
         private void Awake()
         {
