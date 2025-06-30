@@ -1,4 +1,5 @@
-﻿using Controller2DProject.ScriptableStateMachine.Controller;
+﻿using Controller2DProject.Controllers;
+using Controller2DProject.ScriptableStateMachine.Controller;
 using UnityEngine;
 namespace Controller2DProject.ScriptableStateMachine
 {
@@ -6,10 +7,13 @@ namespace Controller2DProject.ScriptableStateMachine
     public class PlayerContext : ScriptableObject
     {
         public PlayerController  PlayerController;
+        public DashRefillManager DashRefill;
+        public bool IsDashing;
         
         public void Initialize(PlayerController playerController)
         {
             PlayerController = playerController;
+            DashRefill = new DashRefillManager(PlayerController.PlayerData);
         }
     }
 }

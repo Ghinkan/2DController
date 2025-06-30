@@ -40,6 +40,11 @@ MonoBehaviour:
         Value: 0
       - Key: {fileID: 11400000, guid: ea15f203f5a91be41a9294e03fb1123d, type: 2}
         Value: 1
+  - To: {fileID: 11400000, guid: 1f658312a4dd17442a3d01191616c562, type: 2}
+    _rules:
+      _serializedList:
+      - Key: {fileID: 11400000, guid: 2a86299ec9d29a24bb2b8e9c9b0f80be, type: 2}
+        Value: 1
   - To: {fileID: 11400000, guid: 1aacd295773b39d4fae4e2ad0ac86092, type: 2}
     _rules:
       _serializedList:

@@ -18,8 +18,6 @@ namespace Controller2DProject.Controllers.States
         private Vector2 _dashDirection;
         private bool _isDashAttacking;
         private float _dashTimer;
-        private bool _isRefilling;
-        private int _refillQueue;
 
         public int DashesLeft => _dashRefill.DashesLeft;
         

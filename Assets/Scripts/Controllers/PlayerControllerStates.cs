@@ -99,7 +99,8 @@ namespace Controller2DProject.Controllers
             At(_wallJumpState, _wallSlide,     () => CanSlide());
             
             Any(_dashState, () => _dashState.DashesLeft > 0 && LastPressedDashTime.IsRunning);
-            At(_dashState, _runState, () => !_dashState.IsDashing && IsGrounded());
+            At(_dashState, _idleState, () => !_dashState.IsDashing && IsGrounded() && !HaveHorizontalInput());
+            At(_dashState, _runState, () => !_dashState.IsDashing && IsGrounded() && HaveHorizontalInput());
             At(_dashState, _fallState, () => !_dashState.IsDashing && !IsGrounded());
             At(_dashState, _wallSlide, () => !_dashState.IsDashing && CanSlide());
             

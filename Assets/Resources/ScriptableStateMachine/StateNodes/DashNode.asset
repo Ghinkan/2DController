@@ -10,13 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ce13f7a5d9da479bb2c903c9ec1b075e, type: 3}
-  m_Name: JumpNode
+  m_Name: DashNode
   m_EditorClassIdentifier: 
-  State: {fileID: 11400000, guid: d01500000703cdc4dbcc492a214f6a96, type: 2}
+  State: {fileID: 11400000, guid: 1f658312a4dd17442a3d01191616c562, type: 2}
   Transitions:
   - To: {fileID: 11400000, guid: 04f31e6a104008147af52b3273a82d8f, type: 2}
     _rules:
       _serializedList:
+      - Key: {fileID: 11400000, guid: 8448b60db4f68eb4b96ba453ba090331, type: 2}
+        Value: 1
       - Key: {fileID: 11400000, guid: df94dac63b3b43144b900d65ef10bcee, type: 2}
         Value: 1
       - Key: {fileID: 11400000, guid: cb686f57548758742bf8f3f4da29320b, type: 2}
@@ -24,6 +26,8 @@ MonoBehaviour:
   - To: {fileID: 11400000, guid: abdd34d9b99a49a4b902d2de61749c0a, type: 2}
     _rules:
       _serializedList:
+      - Key: {fileID: 11400000, guid: 8448b60db4f68eb4b96ba453ba090331, type: 2}
+        Value: 1
       - Key: {fileID: 11400000, guid: df94dac63b3b43144b900d65ef10bcee, type: 2}
         Value: 1
       - Key: {fileID: 11400000, guid: cb686f57548758742bf8f3f4da29320b, type: 2}
@@ -31,10 +35,14 @@ MonoBehaviour:
   - To: {fileID: 11400000, guid: 4fc3af6500bf042438725af587e1c19c, type: 2}
     _rules:
       _serializedList:
-      - Key: {fileID: 11400000, guid: 77f0786f28866724c8d14f7c5cadfb24, type: 2}
+      - Key: {fileID: 11400000, guid: 8448b60db4f68eb4b96ba453ba090331, type: 2}
         Value: 1
-  - To: {fileID: 11400000, guid: 1f658312a4dd17442a3d01191616c562, type: 2}
+      - Key: {fileID: 11400000, guid: df94dac63b3b43144b900d65ef10bcee, type: 2}
+        Value: 0
+  - To: {fileID: 11400000, guid: 2ffa6b172620fd141bea63fe1a224b8b, type: 2}
     _rules:
       _serializedList:
-      - Key: {fileID: 11400000, guid: 2a86299ec9d29a24bb2b8e9c9b0f80be, type: 2}
+      - Key: {fileID: 11400000, guid: 8448b60db4f68eb4b96ba453ba090331, type: 2}
+        Value: 1
+      - Key: {fileID: 11400000, guid: ea15f203f5a91be41a9294e03fb1123d, type: 2}
         Value: 1

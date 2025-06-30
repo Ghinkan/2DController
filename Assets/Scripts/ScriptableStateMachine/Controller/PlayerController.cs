@@ -121,16 +121,10 @@ namespace Controller2DProject.ScriptableStateMachine.Controller
             if (GroundSensor.HasDetectedHit() && StateMachine.CurrentState is not JumpStateScriptable)
                 LastOnGroundTimer.Restart(PlayerData.CoyoteTime);
             
-            // if (IsWallOnRight() && _stateMachine.CurrentState is not WallJumpState)
-            //     LastOnWallRightTime.Restart(_playerData.CoyoteTime);
-            //
-            // if (IsWallOnLeft() && _stateMachine.CurrentState is not WallJumpState)
-            //     LastOnWallLeftTime.Restart(_playerData.CoyoteTime);
-            
-            if (IsWallOnRight())
+            if (IsWallOnRight() && StateMachine.CurrentState is not WallJumpScriptable)
                 LastOnWallRightTime.Restart(PlayerData.CoyoteTime);
             
-            if (IsWallOnLeft())
+            if (IsWallOnLeft() && StateMachine.CurrentState is not WallJumpScriptable)
                 LastOnWallLeftTime.Restart(PlayerData.CoyoteTime);
             
             float maxWallTime = Mathf.Max(LastOnWallLeftTime.CurrentTime, LastOnWallRightTime.CurrentTime);

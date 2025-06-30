@@ -31,5 +31,4 @@ namespace Controller2DProject.ScriptableStateMachine
             PlayerContext.PlayerController.Rb.AddForce(movement * Vector2.up);
         }
     }
-
 }
