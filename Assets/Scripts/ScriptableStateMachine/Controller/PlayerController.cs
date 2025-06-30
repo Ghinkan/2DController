@@ -127,6 +127,12 @@ namespace Controller2DProject.ScriptableStateMachine.Controller
             // if (IsWallOnLeft() && _stateMachine.CurrentState is not WallJumpState)
             //     LastOnWallLeftTime.Restart(_playerData.CoyoteTime);
             
+            if (IsWallOnRight())
+                LastOnWallRightTime.Restart(PlayerData.CoyoteTime);
+            
+            if (IsWallOnLeft())
+                LastOnWallLeftTime.Restart(PlayerData.CoyoteTime);
+            
             float maxWallTime = Mathf.Max(LastOnWallLeftTime.CurrentTime, LastOnWallRightTime.CurrentTime);
             if (maxWallTime > 0)
                 LastOnWallTimer.Restart(maxWallTime);

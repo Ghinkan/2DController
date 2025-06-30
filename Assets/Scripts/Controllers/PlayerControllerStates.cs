@@ -81,7 +81,6 @@ namespace Controller2DProject.Controllers
             At(_jumpState, _fallState,    () => IsFalling());
             At(_jumpState, _idleState,    () => IsGrounded() && IsIdle());
             At(_jumpState, _runState,     () => IsGrounded() && HaveHorizontalInput());
-            At(_wallSlide, _wallJumpState, () => CanWallJump());
             
             At(_fallState, _idleState,    () => IsGrounded() && IsIdle());
             At(_fallState, _runState,     () => IsGrounded() && HaveHorizontalInput());

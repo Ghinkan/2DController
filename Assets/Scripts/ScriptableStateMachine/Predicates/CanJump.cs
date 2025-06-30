@@ -9,4 +9,5 @@ namespace Controller2DProject.ScriptableStateMachine.Predicates
             return PlayerContext.PlayerController.LastPressedJumpTime.IsRunning && PlayerContext.PlayerController.LastOnGroundTimer.IsRunning;
         }
     }
+
 }

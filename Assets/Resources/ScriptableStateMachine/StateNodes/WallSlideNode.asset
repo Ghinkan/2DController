@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ce13f7a5d9da479bb2c903c9ec1b075e, type: 3}
-  m_Name: FallNode
+  m_Name: WallSlideNode
   m_EditorClassIdentifier: 
-  State: {fileID: 11400000, guid: 4fc3af6500bf042438725af587e1c19c, type: 2}
+  State: {fileID: 11400000, guid: 2ffa6b172620fd141bea63fe1a224b8b, type: 2}
   Transitions:
   - To: {fileID: 11400000, guid: 04f31e6a104008147af52b3273a82d8f, type: 2}
     _rules:
@@ -28,18 +28,13 @@ MonoBehaviour:
         Value: 1
       - Key: {fileID: 11400000, guid: cb686f57548758742bf8f3f4da29320b, type: 2}
         Value: 1
-  - To: {fileID: 11400000, guid: d01500000703cdc4dbcc492a214f6a96, type: 2}
-    _rules:
-      _serializedList:
-      - Key: {fileID: 11400000, guid: 7fe2a83100a7fa143b2ab39d7ff0459f, type: 2}
-        Value: 1
-  - To: {fileID: 11400000, guid: 2ffa6b172620fd141bea63fe1a224b8b, type: 2}
+  - To: {fileID: 11400000, guid: 4fc3af6500bf042438725af587e1c19c, type: 2}
     _rules:
       _serializedList:
       - Key: {fileID: 11400000, guid: df94dac63b3b43144b900d65ef10bcee, type: 2}
         Value: 0
       - Key: {fileID: 11400000, guid: ea15f203f5a91be41a9294e03fb1123d, type: 2}
-        Value: 1
+        Value: 0
   - To: {fileID: 11400000, guid: 1aacd295773b39d4fae4e2ad0ac86092, type: 2}
     _rules:
       _serializedList:
