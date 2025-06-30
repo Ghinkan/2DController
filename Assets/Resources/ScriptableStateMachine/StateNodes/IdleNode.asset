@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ce13f7a5d9da479bb2c903c9ec1b075e, type: 3}
+  m_Name: IdleNode
+  m_EditorClassIdentifier: 
+  State: {fileID: 11400000, guid: 04f31e6a104008147af52b3273a82d8f, type: 2}
+  Transitions:
+  - To: {fileID: 11400000, guid: abdd34d9b99a49a4b902d2de61749c0a, type: 2}
+    _rules:
+      _serializedList:
+      - Key: {fileID: 11400000, guid: df94dac63b3b43144b900d65ef10bcee, type: 2}
+        Value: 1
+      - Key: {fileID: 11400000, guid: cb686f57548758742bf8f3f4da29320b, type: 2}
+        Value: 1
+  - To: {fileID: 11400000, guid: d01500000703cdc4dbcc492a214f6a96, type: 2}
+    _rules:
+      _serializedList:
+      - Key: {fileID: 11400000, guid: 7fe2a83100a7fa143b2ab39d7ff0459f, type: 2}
+        Value: 1
+  - To: {fileID: 11400000, guid: 4fc3af6500bf042438725af587e1c19c, type: 2}
+    _rules:
+      _serializedList:
+      - Key: {fileID: 11400000, guid: df94dac63b3b43144b900d65ef10bcee, type: 2}
+        Value: 0
