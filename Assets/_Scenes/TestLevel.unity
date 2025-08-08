@@ -4227,13 +4227,13 @@ MonoBehaviour:
     LayerMask:
       serializedVersion: 2
       m_Bits: 8
-    _groundBoxCheckSize: {x: 0.1, y: 1}
+    _groundBoxCheckSize: {x: 0.2, y: 1}
   _backWallSensor:
     Transform: {fileID: 1810300106}
     LayerMask:
       serializedVersion: 2
       m_Bits: 8
-    _groundBoxCheckSize: {x: 0.1, y: 1}
+    _groundBoxCheckSize: {x: 0.2, y: 1}
   IsJumpCut: 0
 --- !u!70 &1680344532
 CapsuleCollider2D:
@@ -4547,12 +4547,12 @@ GameObject:
   - component: {fileID: 1920671875}
   - component: {fileID: 1920671874}
   m_Layer: 6
-  m_Name: PlayerTest
+  m_Name: PlayerScriptableStateMachine
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1920671874
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4581,13 +4581,13 @@ MonoBehaviour:
     LayerMask:
       serializedVersion: 2
       m_Bits: 8
-    _groundBoxCheckSize: {x: 0.1, y: 1}
+    _groundBoxCheckSize: {x: 0.2, y: 1}
   BackWallSensor:
     Transform: {fileID: 231842834}
     LayerMask:
       serializedVersion: 2
       m_Bits: 8
-    _groundBoxCheckSize: {x: 0.1, y: 1}
+    _groundBoxCheckSize: {x: 0.2, y: 1}
   Rb: {fileID: 1920671876}
   StateMachine: {fileID: 11400000, guid: 0cea99580cc82634aaa5431a316f7a74, type: 2}
   IsJumpCut: 0
